@@ -1,21 +1,4 @@
-#load the libaries required, if it is not there, then it will be installed
-list.of.packages <-
-  c(
-    "shiny",
-    "readr",
-    "tidyverse",
-    "seqRFLP",
-    "ggplot2",
-    "Rcpp",
-    "dplyr",
-    "DT",
-    "shinythemes"
-  )
-new.packages <-
-  list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
-if (length(new.packages))
-  install.packages(new.packages)
-
+#load the libaries required
 library(shiny)
 library(readr)
 library(tidyverse)

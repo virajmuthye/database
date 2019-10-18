@@ -1,0 +1,8 @@
+readr
+tidyverse
+seqRFLP
+ggplot2
+Rcpp
+dplyr
+DT
+shinythemes
