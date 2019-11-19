@@ -10,13 +10,13 @@ library(DT)
 library(shinythemes)
 
 #read in the datasets
-MyTable <- read_csv("pfam_mitominer_tissue.csv")
-MyOrtho <- read_csv("orthology_mitominer_domcomb_tissue.csv")
-MyPre <- read_csv("presequence_mitominer_domcomb_tissue.csv")
-MyGO <- read_csv("go_mitominer.csv")
-MyGene <- read_csv("gene.csv")
-MyOntology <- read_csv("ontology.csv")
-MyDomOnt <- read_csv("pfam2go.csv")
+MyTable <- read_csv("data/pfam_mitominer_tissue.csv")
+MyOrtho <- read_csv("data/orthology_mitominer_domcomb_tissue.csv")
+MyPre <- read_csv("data/presequence_mitominer_domcomb_tissue.csv")
+MyGO <- read_csv("data/go_mitominer.csv")
+MyGene <- read_csv("data/gene.csv")
+MyOntology <- read_csv("data/ontology.csv")
+MyDomOnt <- read_csv("data/pfam2go.csv")
 
 #extract colum informations
 col1 <-  MyTable$species
