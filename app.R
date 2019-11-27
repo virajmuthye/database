@@ -1,4 +1,3 @@
-#load the libaries required
 library(shiny)
 library(readr)
 library(tidyverse)
@@ -8,15 +7,14 @@ library(Rcpp)
 library(dplyr)
 library(DT)
 library(shinythemes)
+library(data.table)
 
 #read in the datasets
-MyTable <- read_csv("data/pfam_mitominer_tissue.csv")
-MyOrtho <- read_csv("data/orthology_mitominer_domcomb_tissue.csv")
-MyPre <- read_csv("data/presequence_mitominer_domcomb_tissue.csv")
-MyGO <- read_csv("data/go_mitominer.csv")
-MyGene <- read_csv("data/gene.csv")
-MyOntology <- read_csv("data/ontology.csv")
-MyDomOnt <- read_csv("data/pfam2go.csv")
+MyTable <- fread("data/domain.csv")
+MyOrtho <- fread("data/orthology.csv")
+MyPre <- fread("data/mts.csv")
+MyGO <- fread("data/ontology.csv")
+MyGene <- fread("data/gene.csv")
 
 #extract colum informations
 col1 <-  MyTable$species
@@ -66,7 +64,7 @@ ui <- fluidPage(
   
   titlePanel("Metazoan Mitochondrial Proteome Database (MMPdb)"),
   
-  #Define the tab panels
+#Define the tab panels
   mainPanel(
     tabsetPanel(
       type = "tabs",
@@ -74,127 +72,46 @@ ui <- fluidPage(
         "About",
         br(),
         p(
-          "MMPdb is a database for facilitating comparative analysis of experimentally-characterized mitochondrial proteomes of bilaterian animals. Publicly 
-           available mitochondrial proteomes were downloaded for four animals - Homo sapiens [1], Mus musculus [1], Caenorhabditis elegans [2], Drosophila
-           melanogaster [3] and two outgroups - Acanthamoeba castellanii [4] and Saccharomyces cerevisiae [5]. Each species is denoted by a four letter 
-           abbreviation listed below."
-        ),
-        p("acas: Acanthamoeba castellanii"),
-        p("scer: Saccharomyces cerevisiae"),
-        p("hsap: Homo sapiens"),
-        p("mmus: Mus musculus"),
-        p("cele: Caenorhabditis elegans"),
-        p("dmel: Drosophila melanogaster"),
-        br(),
-        p(
-          "In this tabset, there are instructions regarding the navigation and usage of the database."
-        ),
-        strong("Usage of the Orthology Tabset"),
-        p(
-          "Proteinortho v5.16b [6] was used to identify Orthologous Groups (OGs) in the four bilaterian species and the two outgroups.
-          Some OGs include both mitochondrial and non-mitochondrial proteins. Each OG is assigned a unique identifier, which is also the
-          primary query for this tabset. The OG number for a protein of interest can be identified as follows. Use the search tool below 
-          to find the OG ID for querying the Orthology Tabset. "
+          "The Metazoan Mitochondrial Proteome Database (MMPdb) is a database for facilitating comparative analysis of experimentally-characterized 
+           mitochondrial proteomes of animals - Homo sapiens (hsap), Mus musculus (mmus), Caenorhabditis elegans (cele), Drosophila melanogaster (dmel) 
+           and two outgroups - Acanthamoeba castellanii (acas) and Saccharomyces cerevisiae (scer). Each species is denoted by a four letter abbreviation 
+          listed in the parentheses."
         ),
         p(
-          "Different search identifiers need to be used to search for proteins from different species."
+          "MMPdb is organized into four tabsets: Orthology, MTS, Domain and Gene Ontology"
         ),
+        strong("Orthology Tabset"),
         p(
-          "For human, mouse, A.castellanii and D.melanogaster, enter the Primary accession number from https://www.uniprot.org/. For example, 
-          if you want to extract orthologs of human fumarate hydratase, then enter its Uniprot identifier 'P07954' in the search tool below.
-          The search tool will display the OG number 'OG1339' the protein belongs to. Enter that OG number 'OG1339' in the search bar in the 
-          Orthology tabset to explore the fumarate hydratase OG."
-        ),
-        p(
-          "For the nematode C. elegans, enter the Protein Wormbase ID from http://intermine.wormbase.org/. For example: CE11580 for fumarate hydratase."
-        ),
-        p(
-          "For yeast, enter the ID from the Saccharomyces Cerevisiae Genome database at https://www.yeastgenome.org/. For example: YPL262W for fumarate hydratase."
-        ),
-        p(
-          "Once you have the OG ID, use it as the search query in the Orthology tabset. (e.g. enter OG1339) in the search tool in the Orthology
-          tabset to fetch the OG.)"
+          "The Orthology tabset can be used to analyze and download proteins belonging to a specific Orthology Group (OG) of interest.
+          An OG is a group of orthologous proteins in the species mentioned above, as identified by Proteinortho v5.16b."
         ),
         br(),
-        br(),
-        DT::dataTableOutput(outputId = "view6"),
-        br(),
-        strong("Usage of the MTS Tabset"),
+        strong("Mitochondrial Targeting Signal (MTS) Tabset"),
         p(
-          "N-terminal mitochondrial targeting presequences (MTS) were identified using TargetP [7] and MitoFates [8]. This tabset allows for 
-          exploration of the MTS-prediction results for all the animal and outgroup proteins."
+          "The majority of mitochondrial proteins are imported into the organelle via the N-terminus Mitochondrial Targeting Signal (MTS)
+          pathway. MTS were identified using TargetP and MitoFates. This tabset allows for the exploration, analysis and download of the 
+          MTS-prediction results for all the proteins from six species listed above."
         ),
         br(),
-        strong("Usage of the Domain Tabset"),
+        strong("Protein Domain Tabset"),
         p(
-          "Protein domain analysis was performed using PFAM libraries and pfam_scan.pl [9]. In tabset, a user can explore and download proteins
-           containing a PFAM domain of interest. For example, to fetch data for all proteins containing the mitochondrial carrier protein domain,
-           enter the domain name 'Mito_carr' in the search bar in the Domain tabset."
+          "The Domain tabset can be used to analyze and download proteins containing a protein domain of interest. Protein domains were
+          identified using PFAM"
         ),
-        p("Below we provide the the pfam2go mappings which might aid in selection of protein domains based
-           on the GO term they are mapped to. It is important to note that if a domain is not present in the pfam2go mapping file, it does not mean
-           that it is not identified in any of the six eukaryotes in the database."),
-        br(),
-        br(),
-        DT::dataTableOutput(outputId = "view8"),
         br(),
         strong("Gene Ontology Tabset"),
         p(
-          "Gene Ontology analysis was performed using Pannzer2.0 [10]. GO terms can be searched using the search tool below."
+          "Gene Ontology analysis was performed using Pannzer2.0 [10].This tabset can be used to analyze and download proteins mapped to
+          a GO term of interest."
         ),
         br(),
-        br(),
-        DT::dataTableOutput(outputId = "view7"),
-        br(),
-        br(),
         p(
-          "Complete database of results, mitochondrial proteomes can be downloaded from : V., Lavrov, D. & Kandoi, G. Data for Metazoan Mitochondrial Proteome database (MMPdb). (2019). Available at: osf.io/gfyq9.  ."
-        ),
-        br(),
-        strong("Additional information for mammalian mitochondrial proteomes"),
-        p(
-          "The most extensively studied mitochondrial proteomes from animals belong to mammals. There is additional information for human and mouse mitochondrial
-           proteomes in this database:"
+          "Details regarding construction of the database are given in our manuscript titled 'MMPdb and MitoPredictor- tools for facilitating
+          comparative analysis of animal mitochondrial proteomes (under review)'"
         ),
         p(
-          "Mitochondrial localization evidence from MitoMiner: 1] Mass-spectrometry and 2] GFP-analysis. This data is available for both mammals."
-        ),
-        p(
-          "1] Mitochondrial localization evidence and 2] Tissue-enrichment evidence from Human Protein Atlas (https://www.proteinatlas.org/humanproteome/tissue/tissue+specific).
-           This data is available for just human proteins."
-        ),
-        br(),
-        strong("References"),
-        p(
-          "[1] Calvo, Sarah E., Karl R. Clauser, and Vamsi K. Mootha. MitoCarta2. 0: an updated inventory of mammalian mitochondrial proteins. Nucleic acids research 44, no. D1 (2015): D1251-D1257."
-        ),
-        p(
-          "[2] Li, J., Cai, T., Wu, P., Cui, Z., Chen, X., Hou, J., Xie, Z., Xue, P., Shi, L., Liu, P. and Yates III, J.R., 2009. Proteomic analysis of mitochondria from Caenorhabditis elegans. Proteomics, 9(19), pp.4539-4553."
-        ),
-        p(
-          "[3] Hu, Y., Comjean, A., Perkins, L.A., Perrimon, N. and Mohr, S.E., 2015. GLAD: an online database of gene list annotation for Drosophila. Journal of genomics, 3, p.75."
-        ),
-        p(
-          "[4] Gawryluk, R.M., Chisholm, K.A., Pinto, D.M. and Gray, M.W., 2014. Compositional complexity of the mitochondrial proteome of a unicellular eukaryote (Acanthamoeba castellanii, supergroup Amoebozoa) rivals that of animals, fungi, and plants. Journal of proteomics, 109, pp.400-416."
-        ),
-        p(
-          "[5] Cherry, J.M., Adler, C., Ball, C., Chervitz, S.A., Dwight, S.S., Hester, E.T., Jia, Y., Juvik, G., Roe, T., Schroeder, M. and Weng, S., 1998. SGD: Saccharomyces genome database. Nucleic acids research, 26(1), pp.73-79."
-        ),
-        p(
-          "[6] Lechner, M., Findei, S., Steiner, L., Marz, M., Stadler, P.F. and Prohaska, S.J., 2011. Proteinortho: detection of (co-) orthologs in large-scale analysis. BMC bioinformatics, 12(1), p.124."
-        ),
-        p(
-          "[7] Emanuelsson, O., Brunak, S., Von Heijne, G. and Nielsen, H., 2007. Locating proteins in the cell using TargetP, SignalP and related tools. Nature protocols, 2(4), p.953."
-        ),
-        p(
-          "[8] Fukasawa, Y., Tsuji, J., Fu, S.C., Tomii, K., Horton, P. and Imai, K., 2015. MitoFates: improved prediction of mitochondrial targeting sequences and their cleavage sites. Molecular & Cellular Proteomics, 14(4), pp.1113-1126."
-        ),
-        p(
-          "[9] Bateman, A., Coin, L., Durbin, R., Finn, R.D., Hollich, V., Griffiths-Jones, S., Khanna, A., Marshall, M., Moxon, S., Sonnhammer, E.L. and Studholme, D.J., 2004. The Pfam protein families database. Nucleic acids research, 32(suppl_1), pp.D138-D141."
-        ),
-        p(
-          "[10] Medlar, A.J., Toronen, P., Zosa, E. and Holm, L., PANNZER 2: Annotate a complete proteome in minutes!. Nucl. Acids Res, 43, pp.W24-W29."
-        )
+          "For queries or suggestions, contact Viraj Muthye at vrmuthye@iastate.edu"
+         )
         ),
       
       ######################################################################################################################################333
@@ -202,25 +119,21 @@ ui <- fluidPage(
       tabPanel(
         "Orthology",
         sidebarPanel(
-          helpText("All field are required fields."),
+          helpText("All field are required fields"),
           checkboxGroupInput(
             "species",
-            label = "Select species:",
+            label = "Select species",
             choices = sort(unique(col4)),
             selected = sort(unique(col4))
           ),
           helpText(
-            "Each species is denoted by a four letter abbreviation. Check the 'About tab' for details about the abbreviations."
+            "Each species is denoted by a four letter abbreviation. Check the About tab for details about the abbreviations."
           ),
           checkboxGroupInput(
             "mitolabel",
-            label = "Mitochondrial / Non-mitochondrial proteins:",
+            label = "Known subcellular localization (mitochondrial/non-mitochondrial):",
             c("Mitochondrial" = "Y", "Non-mitochondrial" = "N"),
             selected = c("Y")
-          ),
-          helpText(
-            "Some Orthologous Groups (OGs) include both mitochondrial and non-mitochondrial proteins. To fetch only mitochondrial proteins, select 'Mitochondrial',
-            and to select both mitochondrial and non-mitochondrial, select both options"
           ),
           checkboxGroupInput(
             "tp_3",
@@ -228,7 +141,9 @@ ui <- fluidPage(
             choices = sort(unique(col20)),
             selected = sort(unique(col20))
           ),
-          helpText("MTS:MTS detected by TargetP, No MTS:No MTS detected by TargetP"),
+          helpText(
+            "M:Mitochondrial, S:Secreted, _:No prediction"
+            ),
           checkboxGroupInput(
             "mf_pred_3",
             label = "MitoFates prediction",
@@ -236,43 +151,35 @@ ui <- fluidPage(
             selected = sort(unique(col21))
           ),
           helpText(
-            "MTS:MTS detected by MitoFates, No MTS:No MTS detected by MitoFates"
+            "M:MTS detected, N:No MTS detected"
           ),
           checkboxGroupInput(
             "GFP_3",
-            label = "GFP evidence (Mammals only)",
+            label = "GFP evidence of mitochondrial localization (Mammals only)",
             choices = sort(unique(col24)),
             selected = sort(unique(col24))
           ),
           helpText(
-            "1: GFP evidence of mitochondrial localization, 0: No GFP evidence, nd: No Data"
+            "Y: GFP evidence of mitochondrial localization, N: No GFP evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "HumanProteinAtlas_3",
-            label = "Human Protein Atlas (HPA) evidence (Human only)",
+            label = "Human Protein Atlas (HPA) evidence for mitochondrial localization (Human only)",
             choices = sort(unique(col23)),
             selected = sort(unique(col23))
           ),
           helpText(
-            "TRUE: HPA evidence of mitochondrial localization, FALSE: No HPA evidence, nd: No Data"
+            "Y: HPA evidence of mitochondrial localization, N: No HPA evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "MassSpecStudies_3",
-            label = "Mass Spectrometry evidence (Mammals only)",
+            label = "Mass Spectrometry evidence for mitochondrial localization (Mammals only)",
             choices = sort(unique(col25)),
             selected = sort(unique(col25))
           ),
+          
           helpText(
-            "TRUE: MS evidence of mitochondrial localization, FALSE: No MS evidence, nd: No Data"
-          ),
-          checkboxGroupInput(
-            "tissue_3",
-            label = "Tissue-enriched (HPA)(Human only)",
-            choices = sort(unique(col34)),
-            selected = sort(unique(col34))
-          ),
-          helpText(
-            "Tissue-enrichment evidence from Human-Protein atlas."
+            "Y: MS evidence of mitochondrial localization, N: No MS evidence, nd: No Data"
           ),
           downloadButton(outputId = "download_data2", label = "Download sequences"),
           helpText("Download selected sequences is a FASTA format"),
@@ -303,15 +210,34 @@ ui <- fluidPage(
           p("Mitochondrial localization evidence from MitoMiner (Mass spectrometry studies)"),
           strong("domainComb"),
           p("Protein domain combination"),
-          strong("tissue"),
-          p("Tissue-enrichent evidence from MitoMiner"),
           br()
         ),
         
+        
         mainPanel(
+          br(),
+          strong(
+            "Search for Orthologous Group (OG) number"
+          ),
+          p(
+            "The Orthologous Group (OG) number is the primary search query for this tabset. To fetch the OG number of a desired protein,
+            enter the Uniprot protein accession (ID) / protein identification code (protein name) for human, mouse, and D. melanogaster proteins.
+            For example, the Uniprot protein accession (ID) for fumarate hydratase in humans is 'P07954' and the protein name is 'FUMH'."
+          ),
+          p("
+            For C.elegans, enter the WormBase protein ID or the Wormbase protein name. For the C. elegans protein fumarate hydratase isoform a,
+            enter either 'CE11580' or 'fum-1 isoform a'."
+          ),
+          br(),
+          DT::dataTableOutput(outputId = "view6"),
+          br(),
+          p(
+            "Enter the OG number in the search bar below to analyze proteins belonging to that OG:"
+          ),
+          br(),
           selectInput(
             inputId = "og",
-            label = "Select OG:",
+            label = "Enter OG number",
             choices = sort(unique(col3)),
             multiple = TRUE
           ),
@@ -328,10 +254,10 @@ ui <- fluidPage(
       tabPanel(
         "MTS",
         sidebarPanel(
-          helpText("All field are required fields."),
+          helpText("All field are required fields"),
           checkboxGroupInput(
             "species_3",
-            label = "Select species:",
+            label = "Select species",
             choices = sort(unique(col10)),
             selected = sort(unique(col10))
           ),
@@ -340,16 +266,13 @@ ui <- fluidPage(
           ),
           checkboxGroupInput(
             "mito",
-            label = "Mitochondrial / Non-mitochondrial proteins:",
+            label = "Known subcellular localization (mitochondrial/non-mitochondrial)",
             c("Mitochondrial" = "Y", "Non-mitochondrial" = "N"),
             selected = c("Y")
           ),
-          helpText(
-            "Mitochondrial: Mitochondrial proteins; Non-mitochondrial: Non-mitochondrial proteins"
-          ),
-          checkboxGroupInput(
+         checkboxGroupInput(
             "OG_present",
-            label = "Present/absent in OG",
+            label = "Present/absent in Orthologous Group (OG)",
             choices = sort(unique(col26)),
             selected = sort(unique(col26))
           ),
@@ -363,16 +286,16 @@ ui <- fluidPage(
             selected = sort(unique(col7))
           ),
           helpText(
-            "TargetP prediction result, M:Mitochondrial,S:Secreted,_:No prediction"
+            "M:Mitochondrial, S:Secreted, _:No prediction"
           ),
           checkboxGroupInput(
             "rc",
-            label = "TargetP RC",
+            label = "Reliability Class (RC)",
             choices = sort(unique(col8)),
             selected = sort(unique(col8))
           ),
           helpText(
-            "Reliability Class of TargetP prediction. This ranges from 1 (strongest prediction) to 5 (weakest prediction)"
+            "RC ranges from 1 (strongest prediction) to 5 (weakest prediction)"
           ),
           checkboxGroupInput(
             "mf",
@@ -381,44 +304,34 @@ ui <- fluidPage(
             selected = sort(unique(col9))
           ),
           helpText(
-            "Prediction of MitoFates, No_mitochondrial_presequence: No MTS detected, Possessing_mitochondrial_presequence: MTS detected"
+            "N: No MTS detected, Y: MTS detected"
           ),
-          
           checkboxGroupInput(
             "GFP",
-            label = "GFP evidence (Mammals only)",
+            label = "GFP evidence of mitochondrial localization (Mammals only)",
             choices = sort(unique(col28)),
             selected = sort(unique(col28))
           ),
           helpText(
-            "1: GFP evidence of mitochondrial localization, 0: No GFP evidence, nd: No Data"
+            "Y: GFP evidence of mitochondrial localization, N: No GFP evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "HumanProteinAtlas",
-            label = "Human Protein Atlas (HPA) evidence (Human only)",
+            label = "Human Protein Atlas (HPA) evidence of mitochondrial localization (Human only)",
             choices = sort(unique(col27)),
             selected = sort(unique(col27))
           ),
           helpText(
-            "TRUE: HPA evidence of mitochondrial localization, FALSE: No HPA evidence, nd: No Data"
+            "Y: HPA evidence of mitochondrial localization, N: No evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "MassSpecStudies",
-            label = "Mass Spectrometry evidence (Mammals only)",
+            label = "Mass Spectrometry evidence of mitochondrial localization (Mammals only)",
             choices = sort(unique(col29)),
             selected = sort(unique(col29))
           ),
           helpText(
-            "0-15: Number of MS studies with evidence, nd: No Data"
-          ),
-          checkboxGroupInput(
-            "tissue",
-            label = "Tissue-enriched (HPA) (Human only)",
-            choices = sort(unique(col35)),
-            selected = sort(unique(col35))
-          ),
-          helpText(
-            "Tissue-enrichment evidence from Human-Protein atlas"
+            "Y: MS evidence of mitochondrial localization, N: No MS evidence, nd: No Data"
           ),
           downloadButton(outputId = "download_data_3", label = "Download sequences"),
           helpText("Download selected sequences is a FASTA format"),
@@ -452,11 +365,10 @@ ui <- fluidPage(
           p("Mitochondrial localization evidence from MitoMiner (Mass spectrometry studies)"),
           strong("domainComb"),
           p("Protein domain combination"),
-          strong("tissue"),
-          p("Tissue-enrichent evidence from MitoMiner"),
           br()
         ),
         mainPanel(
+          br(),
           plotOutput(outputId = "plot3"),
           br(),
           br(),
@@ -469,10 +381,10 @@ ui <- fluidPage(
       tabPanel(
         "Domain",
         sidebarPanel(
-          helpText("All field are required fields."),
+          helpText("All field are required fields"),
           checkboxGroupInput(
             "species_2",
-            label = "Select species:",
+            label = "Select species",
             choices = sort(unique(col1)),
             selected = sort(unique(col1))
           ),
@@ -481,67 +393,55 @@ ui <- fluidPage(
           ),
           checkboxGroupInput(
             "mito_2",
-            label = "Mitochondrial / Non-mitochondrial proteins:",
+            label = "Known subcellular localization (mitochondrial/non-mitochondrial)",
             c("Mitochondrial" = "Y", "Non-mitochondrial" = "N"),
             selected = c("Y", "N")
           ),
-          helpText(
-            "Mitochondrial: Mitochondrial proteins; Non-mitochondrial: Non-mitochondrial proteins"
-          ),
           checkboxGroupInput(
             "tp_2",
-            label = "TargetP:",
+            label = "TargetP prediction",
             choices = sort(unique(col11)),
             selected = sort(unique(col11))
           ),
           helpText(
-            "TargetP prediction result, M:Mitochondrial,S:Secreted,_:No prediction"
+            "M:Mitochondrial,S:Secreted,_:No prediction"
           ),
           checkboxGroupInput(
             "mf_pred_2",
-            label = "MitoFates:",
+            label = "MitoFates prediction",
             choices = sort(unique(col12)),
             selected = sort(unique(col12))
           ),
           helpText(
-            "Prediction of MitoFates, No_mitochondrial_presequence: No MTS detected, Possessing_mitochondrial_presequence: MTS detected"
+            "N: No MTS detected, Y: MTS detected"
           ),
           
           checkboxGroupInput(
             "GFP_2",
-            label = "GFP evidence (Mammals only)",
+            label = "GFP evidence for mitochondrial localization (Mammals only)",
             choices = sort(unique(col31)),
             selected = sort(unique(col31))
           ),
           helpText(
-            "1: GFP evidence of mitochondrial localization, 0: No GFP evidence, nd: No Data"
+            "Y: GFP evidence of mitochondrial localization, N: No GFP evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "HumanProteinAtlas_2",
-            label = "Human Protein Atlas (HPA) evidence (Human only)",
+            label = "Human Protein Atlas (HPA) evidence for mitochondrial localization (Human only)",
             choices = sort(unique(col30)),
             selected = sort(unique(col30))
           ),
           helpText(
-            "TRUE: HPA evidence of mitochondrial localization, FALSE: No HPA evidence, nd: No Data"
+            "Y: HPA evidence of mitochondrial localization, N: No HPA evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "MassSpecStudies_2",
-            label = "Mass Spectrometry evidence (Mammals only)",
+            label = "Mass Spectrometry evidence for mitochondrial localization (Mammals only)",
             choices = sort(unique(col32)),
             selected = sort(unique(col32))
           ),
           helpText(
-            "0-15: Number of MS studies with evidence, nd: No Data"
-          ),
-          checkboxGroupInput(
-            "tissue_2",
-            label = "Tissue-enriched (HPA) (Human only)",
-            choices = sort(unique(col33)),
-            selected = sort(unique(col33))
-          ),
-          helpText(
-            "Tissue-enrichment evidence from Human-Protein atlas"
+            "Y: MS evidence of mitochondrial localization, N: No MS evidence, nd: No Data"
           ),
           downloadButton(outputId = "download_data", label = "Download sequences"),
           helpText("Download selected sequences is a FASTA format"),
@@ -579,15 +479,14 @@ ui <- fluidPage(
           p("Mitochondrial localization evidence from MitoMiner (GFP analysis)"),
           strong("MassSpecStudies"),
           p("Mitochondrial localization evidence from MitoMiner (Mass spectrometry studies)"),
-          strong("tissue"),
-          p("Tissue-enrichent evidence from MitoMiner"),
           br()
           
         ),
         mainPanel(
+          br(),
           selectInput(
             inputId = "domname",
-            label = "Select domain:",
+            label = "Enter protein domain name",
             choices = sort(unique(col2)),
             multiple = TRUE
           ),
@@ -606,7 +505,7 @@ ui <- fluidPage(
       tabPanel(
         "GO analysis",
         sidebarPanel(
-          helpText("All field are required fields."),
+          helpText("All field are required fields"),
           checkboxGroupInput(
             "species_5",
             label = "Select species:",
@@ -618,30 +517,27 @@ ui <- fluidPage(
           ),
           checkboxGroupInput(
             "mito_5",
-            label = "Mitochondrial / Non-mitochondrial proteins:",
+            label = "Known subcellular localization (mitochondrial/non-mitochondrial)",
             c("Mitochondrial" = "Y", "Non-mitochondrial" = "N"),
             selected = c("Y", "N")
           ),
-          helpText(
-            "Mitochondrial: Mitochondrial proteins; Non-mitochondrial: Non-mitochondrial proteins"
-          ),
           checkboxGroupInput(
             "tp_5",
-            label = "TargetP:",
+            label = "TargetP prediction",
             choices = sort(unique(col18)),
             selected = sort(unique(col18))
           ),
           helpText(
-            "TargetP prediction result, M:Mitochondrial,S:Secreted,_:No prediction"
+            "M:Mitochondrial,S:Secreted,_:No prediction"
           ),
           checkboxGroupInput(
             "mf_pred_5",
-            label = "MitoFates:",
+            label = "MitoFates prediction",
             choices = sort(unique(col19)),
             selected = sort(unique(col19))
           ),
           helpText(
-            "Prediction of MitoFates, No_mitochondrial_presequence: No MTS detected, Possessing_mitochondrial_presequence: MTS detected"
+            "N: No MTS detected, Y: MTS detected"
           ),
           checkboxGroupInput(
             "GFP_5",
@@ -650,25 +546,25 @@ ui <- fluidPage(
             selected = sort(unique(col37))
           ),
           helpText(
-            "1: GFP evidence of mitochondrial localization, 0: No GFP evidence, nd: No Data"
+            "Y: GFP evidence of mitochondrial localization, N: No GFP evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "HumanProteinAtlas_5",
-            label = "Human Protein Atlas (HPA) evidence (Human only)",
+            label = "Human Protein Atlas (HPA) evidence of mitochondrial localization(Human only)",
             choices = sort(unique(col36)),
             selected = sort(unique(col36))
           ),
           helpText(
-            "TRUE: HPA evidence of mitochondrial localization, FALSE: No HPA evidence, nd: No Data"
+            "Y: HPA evidence of mitochondrial localization, N: No HPA evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "MassSpecStudies_5",
-            label = "Mass Spectrometry evidence (Mammals only)",
+            label = "Mass Spectrometry evidence of mitochondrial localization(Mammals only)",
             choices = sort(unique(col38)),
             selected = sort(unique(col38))
           ),
           helpText(
-            "0-15: Number of MS studies with evidence, nd: No Data"
+            "Y: MS evidence of mitochondrial localization, N: No MS evidence, nd: No Data"
           ),
           downloadButton(outputId = "download_data_8", label = "Download sequences"),
           helpText("Download selected sequences is a FASTA format"),
@@ -702,15 +598,13 @@ ui <- fluidPage(
           p("Mitochondrial localization evidence from MitoMiner (GFP analysis)"),
           strong("MassSpecStudies"),
           p("Mitochondrial localization evidence from MitoMiner (Mass spectrometry studies)"),
-          strong("tissue"),
-          p("Tissue-enrichent evidence from MitoMiner"),
           br()
-          
         ),
         mainPanel(
+          br(),
           selectInput(
             inputId = "goid",
-            label = "Select GO term:",
+            label = "Enter Gene Ontology (GO) ID",
             choices = sort(unique(col16)),
             multiple = TRUE
           ),
@@ -733,28 +627,11 @@ server <- function(input, output) {
   output$view6 <- DT::renderDataTable({
     DT::datatable(
       data = MyGene,
-      options = list(pageLength = 10),
+      options = list(pageLength = 1),
       rownames = FALSE
     )
   })
-  
-  output$view7 <- DT::renderDataTable({
-    DT::datatable(
-      data = MyOntology,
-      options = list(pageLength = 10),
-      rownames = FALSE
-    )
-  })
-  
-  output$view8 <- DT::renderDataTable({
-    DT::datatable(
-      data = MyDomOnt,
-      options = list(pageLength = 10),
-      rownames = FALSE
-    )
-  })
-  
-  
+
   ################################# domain tabset #######################################
   # Create data table
   output$view <- DT::renderDataTable({
@@ -762,23 +639,23 @@ server <- function(input, output) {
     req(input$species_2)
     
     dom_select <-
-      MyTable %>% filter(domname %in% input$domname) %>% filter(mito %in% input$mito_2) %>% filter(species %in% input$species_2) %>% filter(tp %in% input$tp_2) %>% filter(mf_pred %in% input$mf_pred_2) %>% filter(GFP %in% input$GFP_2) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_2) %>% filter(MassSpecStudies %in% input$MassSpecStudies_2) %>% filter(tissue %in% input$tissue_2)  
+      MyTable %>% filter(domname %in% input$domname) %>% filter(mito %in% input$mito_2) %>% filter(species %in% input$species_2) %>% filter(tp %in% input$tp_2) %>% filter(mf_pred %in% input$mf_pred_2) %>% filter(GFP %in% input$GFP_2) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_2) %>% filter(MassSpecStudies %in% input$MassSpecStudies_2)
     
     DT::datatable(
-      data = dom_select,
-      options = list(pageLength = 10),
+      data = dom_select[, -c(1,10,15)],
+      options = list(pageLength = 50),
       rownames = FALSE
     )
   })
   
   df_subset_2 <- reactive({
     a <-
-      MyTable[col1 %in% input$species_2, ] %>% filter(domname %in% input$domname) %>% filter(species %in% input$species_2) %>% filter(mito %in% input$mito_2) %>% filter(tp %in% input$tp_2)  %>% filter(mf_pred %in% input$mf_pred_2) %>% filter(GFP %in% input$GFP_2) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_2)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_2) %>% filter(tissue %in% input$tissue_2) %>% select(protein)
+      MyTable[col1 %in% input$species_2, ] %>% filter(domname %in% input$domname) %>% filter(species %in% input$species_2) %>% filter(mito %in% input$mito_2) %>% filter(tp %in% input$tp_2)  %>% filter(mf_pred %in% input$mf_pred_2) %>% filter(GFP %in% input$GFP_2) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_2)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_2) %>% select(protein)
       MyPre %>% filter(protein %in% a$protein) %>% select(protein, seq)
   })
   
   df_subset_3 <- reactive({
-    MyTable[col1 %in% input$species_2, ] %>% filter(domname %in% input$domname) %>% filter(species %in% input$species_2) %>% filter(mito %in% input$mito_2)  %>% filter(tp %in% input$tp_2) %>% filter(mf_pred %in% input$mf_pred_2) %>% filter(GFP %in% input$GFP_2) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_2)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_2) %>% filter(tissue %in% input$tissue_2)  
+    MyTable[col1 %in% input$species_2, ] %>% filter(domname %in% input$domname) %>% filter(species %in% input$species_2) %>% filter(mito %in% input$mito_2)  %>% filter(tp %in% input$tp_2) %>% filter(mf_pred %in% input$mf_pred_2) %>% filter(GFP %in% input$GFP_2) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_2)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_2) 
   })
   
   output$plot = renderPlot({
@@ -854,8 +731,8 @@ server <- function(input, output) {
       MyGO %>% filter(goid %in% input$goid)  %>% filter(mito %in% input$mito_5) %>% filter(species %in% input$species_5) %>% filter(tp %in% input$tp_5) %>% filter(mf_pred %in% input$mf_pred_5) %>% filter(GFP %in% input$GFP_5) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_5)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_5) 
     
     DT::datatable(
-      data = go_select,
-      options = list(pageLength = 10),
+      data = go_select[, -c(1,7,12)],
+      options = list(pageLength = 50),
       rownames = FALSE
     )
   })
@@ -918,30 +795,30 @@ server <- function(input, output) {
     req(input$species_3)
     
     pre_select <-
-      MyPre %>% filter(species %in% input$species_3) %>% filter(mito %in% input$mito) %>% filter(tp %in% input$tp) %>% filter(rc %in% input$rc) %>% filter(mf %in% input$mf) %>% filter(OG_present %in% input$OG_present)  %>% filter(GFP %in% input$GFP) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas)  %>% filter(MassSpecStudies %in% input$MassSpecStudies) %>% filter(tissue %in% input$tissue)  
+      MyPre %>% filter(species %in% input$species_3) %>% filter(mito %in% input$mito) %>% filter(tp %in% input$tp) %>% filter(rc %in% input$rc) %>% filter(mf %in% input$mf) %>% filter(OG_present %in% input$OG_present)  %>% filter(GFP %in% input$GFP) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas)  %>% filter(MassSpecStudies %in% input$MassSpecStudies)
     
     DT::datatable(
-      data = pre_select[, -11],
-      options = list(pageLength = 10),
+      data = pre_select[, -c(1,5,7,12,13,14)],
+      options = list(pageLength = 50),
       rownames = FALSE
     )
     
   })
   
   df_subset_5 <- reactive({
-    MyPre %>% filter(species %in% input$species_3) %>% filter(mito %in% input$mito) %>% filter(tp %in% input$tp) %>% filter(rc %in% input$rc) %>% filter(mf %in% input$mf) %>% filter(OG_present %in% input$OG_present)  %>% filter(GFP %in% input$GFP) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas)  %>% filter(MassSpecStudies %in% input$MassSpecStudies) %>% filter(tissue %in% input$tissue) %>% select(protein, seq)
+    MyPre %>% filter(species %in% input$species_3) %>% filter(mito %in% input$mito) %>% filter(tp %in% input$tp) %>% filter(rc %in% input$rc) %>% filter(mf %in% input$mf) %>% filter(OG_present %in% input$OG_present)  %>% filter(GFP %in% input$GFP) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas)  %>% filter(MassSpecStudies %in% input$MassSpecStudies) %>% select(protein, seq)
   })
   
   df_subset_6 <- reactive({
-    MyPre %>% filter(species %in% input$species_3) %>% filter(mito %in% input$mito) %>% filter(tp %in% input$tp) %>% filter(rc %in% input$rc) %>% filter(mf %in% input$mf) %>% filter(OG_present %in% input$OG_present)  %>% filter(GFP %in% input$GFP) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas)  %>% filter(MassSpecStudies %in% input$MassSpecStudies) %>% filter(tissue %in% input$tissue)
+    MyPre %>% filter(species %in% input$species_3) %>% filter(mito %in% input$mito) %>% filter(tp %in% input$tp) %>% filter(rc %in% input$rc) %>% filter(mf %in% input$mf) %>% filter(OG_present %in% input$OG_present)  %>% filter(GFP %in% input$GFP) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas)  %>% filter(MassSpecStudies %in% input$MassSpecStudies)
   })
   
   df_subset_7 <- reactive({
-    MyPre %>% filter(species %in% input$species_3) %>% filter(mito %in% input$mito) %>% filter(tp %in% input$tp) %>% filter(rc %in% input$rc) %>% filter(mf %in% input$mf) %>% filter(OG_present %in% input$OG_present) %>% filter(GFP %in% input$GFP) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas)  %>% filter(MassSpecStudies %in% input$MassSpecStudies) %>% filter(tissue %in% input$tissue)
+    MyPre %>% filter(species %in% input$species_3) %>% filter(mito %in% input$mito) %>% filter(tp %in% input$tp) %>% filter(rc %in% input$rc) %>% filter(mf %in% input$mf) %>% filter(OG_present %in% input$OG_present) %>% filter(GFP %in% input$GFP) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas)  %>% filter(MassSpecStudies %in% input$MassSpecStudies)
   })
   
   df_subset_9 <- reactive({
-    MyPre %>% filter(species %in% input$species_3) %>% filter(mito %in% input$mito) %>% filter(tp %in% input$tp) %>% filter(rc %in% input$rc) %>% filter(mf %in% input$mf) %>% filter(OG_present %in% input$OG_present) %>% select(mppsite) %>% filter(GFP %in% input$GFP) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas)  %>% filter(MassSpecStudies %in% input$MassSpecStudies) %>% filter(tissue %in% input$tissue)
+    MyPre %>% filter(species %in% input$species_3) %>% filter(mito %in% input$mito) %>% filter(tp %in% input$tp) %>% filter(rc %in% input$rc) %>% filter(mf %in% input$mf) %>% filter(OG_present %in% input$OG_present) %>% select(mppsite) %>% filter(GFP %in% input$GFP) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas)  %>% filter(MassSpecStudies %in% input$MassSpecStudies)
   })
   
   output$plot3 = renderPlot({
@@ -993,22 +870,22 @@ server <- function(input, output) {
     req(input$species)
     
     ortho_select <-
-      MyOrtho %>% filter(og %in% input$og) %>% filter(species %in% input$species) %>% filter(mito %in% input$mitolabel) %>% filter(tp %in% input$tp_3) %>% filter(mf_pred %in% input$mf_pred_3) %>% filter(GFP %in% input$GFP_3) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_3)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_3) %>% filter(tissue %in% input$tissue_3)
+      MyOrtho %>% filter(og %in% input$og) %>% filter(species %in% input$species) %>% filter(mito %in% input$mitolabel) %>% filter(tp %in% input$tp_3) %>% filter(mf_pred %in% input$mf_pred_3) %>% filter(GFP %in% input$GFP_3) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_3)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_3)
     
     DT::datatable(
-      data = ortho_select,
-      options = list(pageLength = 10),
+      data = ortho_select[, -c(1,7)],
+      options = list(pageLength = 50),
       rownames = FALSE
     )
   })
   
   df_subset <- reactive({
     s <-
-      MyOrtho[col4 %in% input$species, ] %>% filter(og %in% input$og) %>% filter(species %in% input$species) %>% filter(mito %in% input$mitolabel) %>% filter(tp %in% input$tp_3) %>% filter(mf_pred %in% input$mf_pred_3) %>% filter(GFP %in% input$GFP_3) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_3)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_3) %>% filter(tissue %in% input$tissue_3) %>% select(protein)
+      MyOrtho[col4 %in% input$species, ] %>% filter(og %in% input$og) %>% filter(species %in% input$species) %>% filter(mito %in% input$mitolabel) %>% filter(tp %in% input$tp_3) %>% filter(mf_pred %in% input$mf_pred_3) %>% filter(GFP %in% input$GFP_3) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_3)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_3) %>% select(protein)
       MyPre %>% filter(protein %in% s$protein) %>% select(protein, seq)
   })
   df_subset_4 <- reactive({
-    MyOrtho[col4 %in% input$species, ] %>% filter(og %in% input$og) %>% filter(species %in% input$species) %>% filter(mito %in% input$mitolabel) %>% filter(tp %in% input$tp_3) %>% filter(mf_pred %in% input$mf_pred_3) %>% filter(GFP %in% input$GFP_3) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_3)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_3) %>% filter(tissue %in% input$tissue_3)
+    MyOrtho[col4 %in% input$species, ] %>% filter(og %in% input$og) %>% filter(species %in% input$species) %>% filter(mito %in% input$mitolabel) %>% filter(tp %in% input$tp_3) %>% filter(mf_pred %in% input$mf_pred_3) %>% filter(GFP %in% input$GFP_3) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_3)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_3)
   })
   
   output$plot2 = renderPlot({
