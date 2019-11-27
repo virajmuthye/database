@@ -7,4 +7,3 @@ dplyr
 DT
 shinythemes
 data.table
-
