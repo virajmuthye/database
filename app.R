@@ -10,10 +10,10 @@ library(shinythemes)
 library(data.table)
 
 #read in the datasets
-MyTable <- fread("data/domain.csv")
-MyOrtho <- fread("data/orthology.csv")
-MyPre <- fread("data/mts.csv")
-MyGO <- fread("data/ontology.csv")
+MyTable <- fread("data/pfam_mitominer_tissue.csv")
+MyOrtho <- fread("data/orthology_mitominer_domcomb_tissue.csv")
+MyPre <- fread("data/presequence_mitominer_domcomb_tissue.csv")
+MyGO <- fread("data/go_mitominer.csv")
 MyGene <- fread("data/gene.csv")
 
 #extract colum informations
