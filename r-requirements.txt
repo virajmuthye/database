@@ -6,3 +6,4 @@ Rcpp
 dplyr
 DT
 shinythemes
+data.table
