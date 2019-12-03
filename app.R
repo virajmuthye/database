@@ -10,12 +10,12 @@ library(shinythemes)
 library(data.table)
 
 #read in the datasets
-MyTable <- fread("pfam_mitominer_tissue.csv")
-MyOrtho <- fread("orthology_mitominer_domcomb_tissue.csv")
-MyPre <- fread("presequence_mitominer_domcomb_tissue.csv")
-MyGO <- fread("go_mitominer.csv")
-MyGene <- fread("gene.csv", fill=TRUE)
-MyOntology <- fread("ontology.csv")
+MyTable <- fread("data/pfam_mitominer_tissue.csv")
+MyOrtho <- fread("data/orthology_mitominer_domcomb_tissue.csv")
+MyPre <- fread("data/presequence_mitominer_domcomb_tissue.csv")
+MyGO <- fread("data/go_mitominer.csv")
+MyGene <- fread("data/gene.csv", fill=TRUE)
+MyOntology <- fread("data/ontology.csv")
 
 #extract colum informations
 col1 <-  MyTable$species
@@ -65,7 +65,7 @@ ui <- fluidPage(
   
   titlePanel("Metazoan Mitochondrial Proteome Database (MMPdb)"),
   
-#Define the tab panels
+  #Define the tab panels
   mainPanel(
     tabsetPanel(
       type = "tabs",
@@ -74,8 +74,8 @@ ui <- fluidPage(
         br(),
         p(
           "The Metazoan Mitochondrial Proteome Database (MMPdb) is a database for facilitating comparative analysis of experimentally-characterized 
-           mitochondrial proteomes of animals - Homo sapiens (hsap), Mus musculus (mmus), Caenorhabditis elegans (cele), Drosophila melanogaster (dmel) 
-           and two outgroups - Acanthamoeba castellanii (acas) and Saccharomyces cerevisiae (scer). Each species is denoted by a four letter abbreviation 
+          mitochondrial proteomes of animals - Homo sapiens (hsap), Mus musculus (mmus), Caenorhabditis elegans (cele), Drosophila melanogaster (dmel) 
+          and two outgroups - Acanthamoeba castellanii (acas) and Saccharomyces cerevisiae (scer). Each species is denoted by a four letter abbreviation 
           listed in the parentheses."
         ),
         br(),
@@ -119,7 +119,7 @@ ui <- fluidPage(
         br(),
         p(
           "For queries or suggestions, contact Viraj Muthye at vrmuthye@iastate.edu"
-         )
+        )
         ),
       
       ######################################################################################################################################333
@@ -131,11 +131,8 @@ ui <- fluidPage(
           checkboxGroupInput(
             "species",
             label = "Select species",
-            choices = sort(unique(col4)),
+            c("A. castellanii" = "acas", "H. sapiens" = "hsap", "M. musculus" = "mmus", "D. melanogaster" = "dmel", "C. elegans" = "cele", "S. cerevisiae" = "scer"),
             selected = sort(unique(col4))
-          ),
-          helpText(
-            "Each species is denoted by a four letter abbreviation. Check the About tab for details about the abbreviations."
           ),
           checkboxGroupInput(
             "mitolabel",
@@ -146,48 +143,32 @@ ui <- fluidPage(
           checkboxGroupInput(
             "tp_3",
             label = "TargetP prediction",
-            choices = sort(unique(col20)),
+            c("Mitochondrial" = "M", "Secreted" = "S", "Other localization" = "_"),
             selected = sort(unique(col20))
           ),
-          helpText(
-            "M:Mitochondrial, S:Secreted, _:No prediction"
-            ),
           checkboxGroupInput(
             "mf_pred_3",
             label = "MitoFates prediction",
-            choices = sort(unique(col21)),
+            c("Mitochondrial"="Y","Non-mitochondrial"="N"),
             selected = sort(unique(col21))
-          ),
-          helpText(
-            "M:MTS detected, N:No MTS detected"
           ),
           checkboxGroupInput(
             "GFP_3",
             label = "GFP evidence of mitochondrial localization (Mammals only)",
-            choices = sort(unique(col24)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col24))
-          ),
-          helpText(
-            "Y: GFP evidence of mitochondrial localization, N: No GFP evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "HumanProteinAtlas_3",
             label = "Human Protein Atlas (HPA) evidence for mitochondrial localization (Human only)",
-            choices = sort(unique(col23)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col23))
-          ),
-          helpText(
-            "Y: HPA evidence of mitochondrial localization, N: No HPA evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "MassSpecStudies_3",
             label = "Mass Spectrometry evidence for mitochondrial localization (Mammals only)",
-            choices = sort(unique(col25)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col25))
-          ),
-          
-          helpText(
-            "Y: MS evidence of mitochondrial localization, N: No MS evidence, nd: No Data"
           ),
           downloadButton(outputId = "download_data2", label = "Download sequences"),
           helpText("Download selected sequences is a FASTA format"),
@@ -245,11 +226,11 @@ ui <- fluidPage(
           br(),
           br(),
           DT::dataTableOutput(outputId = "view2")
-        )
+          )
         
-      ),
+          ),
       
- 
+      
       ###############################################################################################################################      
       tabPanel(
         "MTS",
@@ -258,11 +239,8 @@ ui <- fluidPage(
           checkboxGroupInput(
             "species_3",
             label = "Select species",
-            choices = sort(unique(col10)),
+            c("A. castellanii" = "acas", "H. sapiens" = "hsap", "M. musculus" = "mmus", "D. melanogaster" = "dmel", "C. elegans" = "cele", "S. cerevisiae" = "scer"),
             selected = sort(unique(col10))
-          ),
-          helpText(
-            "Each species is denoted by a four letter abbreviation. Check the About tab for details about the abbreviations."
           ),
           checkboxGroupInput(
             "mito",
@@ -270,23 +248,17 @@ ui <- fluidPage(
             c("Mitochondrial" = "Y", "Non-mitochondrial" = "N"),
             selected = c("Y")
           ),
-         checkboxGroupInput(
+          checkboxGroupInput(
             "OG_present",
             label = "Present/absent in Orthologous Group (OG)",
-            choices = sort(unique(col26)),
+            c("Not present in any OG" = "N", "Present in OG" = "OG"),
             selected = sort(unique(col26))
-          ),
-          helpText(
-            "Is the protein present in any OG, i.e. does it have an ortholog in any other species."
           ),
           checkboxGroupInput(
             "tp",
             label = "TargetP prediction",
-            choices = sort(unique(col7)),
+            c("Mitochondrial" = "M", "Secreted" = "S", "Other localization" = "_"),
             selected = sort(unique(col7))
-          ),
-          helpText(
-            "M:Mitochondrial, S:Secreted, _:No prediction"
           ),
           checkboxGroupInput(
             "rc",
@@ -300,38 +272,26 @@ ui <- fluidPage(
           checkboxGroupInput(
             "mf",
             label = "MitoFates prediction",
-            choices = sort(unique(col9)),
+            c("Mitochondrial"="Y","Non-mitochondrial"="N"),
             selected = sort(unique(col9))
-          ),
-          helpText(
-            "N: No MTS detected, Y: MTS detected"
           ),
           checkboxGroupInput(
             "GFP",
             label = "GFP evidence of mitochondrial localization (Mammals only)",
-            choices = sort(unique(col28)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col28))
-          ),
-          helpText(
-            "Y: GFP evidence of mitochondrial localization, N: No GFP evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "HumanProteinAtlas",
             label = "Human Protein Atlas (HPA) evidence of mitochondrial localization (Human only)",
-            choices = sort(unique(col27)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col27))
-          ),
-          helpText(
-            "Y: HPA evidence of mitochondrial localization, N: No evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "MassSpecStudies",
             label = "Mass Spectrometry evidence of mitochondrial localization (Mammals only)",
-            choices = sort(unique(col29)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col29))
-          ),
-          helpText(
-            "Y: MS evidence of mitochondrial localization, N: No MS evidence, nd: No Data"
           ),
           downloadButton(outputId = "download_data_3", label = "Download sequences"),
           helpText("Download selected sequences is a FASTA format"),
@@ -369,7 +329,7 @@ ui <- fluidPage(
         )
         
       ),
- 
+      
       ###############################################################################################################################           
       tabPanel(
         "Domain",
@@ -378,11 +338,8 @@ ui <- fluidPage(
           checkboxGroupInput(
             "species_2",
             label = "Select species",
-            choices = sort(unique(col1)),
+            c("A. castellanii" = "acas", "H. sapiens" = "hsap", "M. musculus" = "mmus", "D. melanogaster" = "dmel", "C. elegans" = "cele", "S. cerevisiae" = "scer"),
             selected = sort(unique(col1))
-          ),
-          helpText(
-            "Each species is denoted by a four letter abbreviation. Check the About tab for details about the abbreviations."
           ),
           checkboxGroupInput(
             "mito_2",
@@ -393,48 +350,32 @@ ui <- fluidPage(
           checkboxGroupInput(
             "tp_2",
             label = "TargetP prediction",
-            choices = sort(unique(col11)),
+            c("Mitochondrial" = "M", "Secreted" = "S", "Other localization" = "_"),
             selected = sort(unique(col11))
-          ),
-          helpText(
-            "M:Mitochondrial,S:Secreted,_:No prediction"
           ),
           checkboxGroupInput(
             "mf_pred_2",
             label = "MitoFates prediction",
-            choices = sort(unique(col12)),
+            c("Mitochondrial"="Y","Non-mitochondrial"="N"),
             selected = sort(unique(col12))
           ),
-          helpText(
-            "N: No MTS detected, Y: MTS detected"
-          ),
-          
           checkboxGroupInput(
             "GFP_2",
             label = "GFP evidence for mitochondrial localization (Mammals only)",
-            choices = sort(unique(col31)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col31))
-          ),
-          helpText(
-            "Y: GFP evidence of mitochondrial localization, N: No GFP evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "HumanProteinAtlas_2",
             label = "Human Protein Atlas (HPA) evidence for mitochondrial localization (Human only)",
-            choices = sort(unique(col30)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col30))
-          ),
-          helpText(
-            "Y: HPA evidence of mitochondrial localization, N: No HPA evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "MassSpecStudies_2",
             label = "Mass Spectrometry evidence for mitochondrial localization (Mammals only)",
-            choices = sort(unique(col32)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col32))
-          ),
-          helpText(
-            "Y: MS evidence of mitochondrial localization, N: No MS evidence, nd: No Data"
           ),
           downloadButton(outputId = "download_data", label = "Download sequences"),
           helpText("Download selected sequences is a FASTA format"),
@@ -481,7 +422,7 @@ ui <- fluidPage(
         )
         
       ),
-
+      
       ###############################################################################################################################      
       tabPanel(
         "GO analysis",
@@ -489,12 +430,9 @@ ui <- fluidPage(
           helpText("All field are required fields"),
           checkboxGroupInput(
             "species_5",
-            label = "Select species:",
-            choices = sort(unique(col15)),
+            label = "Select species",
+            c("A. castellanii" = "acas", "H. sapiens" = "hsap", "M. musculus" = "mmus", "D. melanogaster" = "dmel", "C. elegans" = "cele", "S. cerevisiae" = "scer"),
             selected = sort(unique(col15))
-          ),
-          helpText(
-            "Each species is denoted by a four letter abbreviation. Check the About tab for details about the abbreviations."
           ),
           checkboxGroupInput(
             "mito_5",
@@ -505,47 +443,32 @@ ui <- fluidPage(
           checkboxGroupInput(
             "tp_5",
             label = "TargetP prediction",
-            choices = sort(unique(col18)),
+            c("Mitochondrial" = "M", "Secreted" = "S", "Other localization" = "_"),
             selected = sort(unique(col18))
-          ),
-          helpText(
-            "M:Mitochondrial,S:Secreted,_:No prediction"
           ),
           checkboxGroupInput(
             "mf_pred_5",
             label = "MitoFates prediction",
-            choices = sort(unique(col19)),
+            c("Mitochondrial"="Y","Non-mitochondrial"="N"),
             selected = sort(unique(col19))
-          ),
-          helpText(
-            "N: No MTS detected, Y: MTS detected"
           ),
           checkboxGroupInput(
             "GFP_5",
             label = "GFP evidence (Mammals only)",
-            choices = sort(unique(col37)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col37))
-          ),
-          helpText(
-            "Y: GFP evidence of mitochondrial localization, N: No GFP evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "HumanProteinAtlas_5",
             label = "Human Protein Atlas (HPA) evidence of mitochondrial localization(Human only)",
-            choices = sort(unique(col36)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col36))
-          ),
-          helpText(
-            "Y: HPA evidence of mitochondrial localization, N: No HPA evidence, nd: No Data"
           ),
           checkboxGroupInput(
             "MassSpecStudies_5",
             label = "Mass Spectrometry evidence of mitochondrial localization(Mammals only)",
-            choices = sort(unique(col38)),
+            c("Mitochondrial" = "Y", "Non-mitochondrial" = "N", "No data" = "nd"),
             selected = sort(unique(col38))
-          ),
-          helpText(
-            "Y: MS evidence of mitochondrial localization, N: No MS evidence, nd: No Data"
           ),
           downloadButton(outputId = "download_data_8", label = "Download sequences"),
           helpText("Download selected sequences is a FASTA format"),
@@ -578,7 +501,7 @@ ui <- fluidPage(
           br(),
           strong(
             "Search for the GO ID"
-            ),
+          ),
           p(
             "The primary search query for this tabset is the GO ID number. To search for the GO ID, start typing the 
             Go term (mitochondrion) or keywords of interest (mitochondrial inner membrane) in the search bar below"
@@ -596,12 +519,12 @@ ui <- fluidPage(
           br(),
           br(),
           DT::dataTableOutput(outputId = "view5")
-        )
+          )
         
       )
         )
-      )
-)
+    )
+  )
 
 ###############################################################################################################################
 ########################## part 2 Define server logic #########################################################################
@@ -623,7 +546,7 @@ server <- function(input, output) {
       rownames = FALSE
     )
   })
-
+  
   ################################# domain tabset #######################################
   # Create data table
   output$view <- DT::renderDataTable({
@@ -643,7 +566,7 @@ server <- function(input, output) {
   df_subset_2 <- reactive({
     a <-
       MyTable[col1 %in% input$species_2, ] %>% filter(domname %in% input$domname) %>% filter(species %in% input$species_2) %>% filter(mito %in% input$mito_2) %>% filter(tp %in% input$tp_2)  %>% filter(mf_pred %in% input$mf_pred_2) %>% filter(GFP %in% input$GFP_2) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_2)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_2) %>% select(protein)
-      MyPre %>% filter(protein %in% a$protein) %>% select(protein, seq)
+    MyPre %>% filter(protein %in% a$protein) %>% select(protein, seq)
   })
   
   df_subset_3 <- reactive({
@@ -715,7 +638,7 @@ server <- function(input, output) {
       write.csv(df_subset_3(), file, quote = FALSE)
     }
   )
-
+  
   ################################# gene ontology tabset #######################################
   # Create data table
   output$view5 <- DT::renderDataTable({
@@ -732,7 +655,7 @@ server <- function(input, output) {
   df_subset_12 <- reactive({
     a <-
       MyGO[col15 %in% input$species_5, ] %>% filter(goid %in% input$goid) %>% filter(species %in% input$species_5)  %>% filter(mito %in% input$mito_5)  %>% filter(tp %in% input$tp_5)  %>% filter(mf_pred %in% input$mf_pred_5) %>% filter(GFP %in% input$GFP_5) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_5)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_5) %>% select(protein)
-      MyPre %>% filter(protein %in% a$protein) %>% select(protein, seq)
+    MyPre %>% filter(protein %in% a$protein) %>% select(protein, seq)
   })
   
   df_subset_13 <- reactive({
@@ -869,13 +792,13 @@ server <- function(input, output) {
       options = list(pageLength = 50),
       #rownames = FALSE,
       colnames = c('OG','Renamed ProteinID','ProteinID','Protein name','Mitochondrial','TargetP prediction','TargetP RC','MitoFates probablity','MitoFates prediction','MPP cleavage site','GO','Human Protein Atlas','GFP','Mass Spectrometry','Domain combination','Tissue')
-      )
+    )
   })
   
   df_subset <- reactive({
     s <-
       MyOrtho[col4 %in% input$species, ] %>% filter(og %in% input$og) %>% filter(species %in% input$species) %>% filter(mito %in% input$mitolabel) %>% filter(tp %in% input$tp_3) %>% filter(mf_pred %in% input$mf_pred_3) %>% filter(GFP %in% input$GFP_3) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_3)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_3) %>% select(protein)
-      MyPre %>% filter(protein %in% s$protein) %>% select(protein, seq)
+    MyPre %>% filter(protein %in% s$protein) %>% select(protein, seq)
   })
   df_subset_4 <- reactive({
     MyOrtho[col4 %in% input$species, ] %>% filter(og %in% input$og) %>% filter(species %in% input$species) %>% filter(mito %in% input$mitolabel) %>% filter(tp %in% input$tp_3) %>% filter(mf_pred %in% input$mf_pred_3) %>% filter(GFP %in% input$GFP_3) %>% filter(HumanProteinAtlas %in% input$HumanProteinAtlas_3)  %>% filter(MassSpecStudies %in% input$MassSpecStudies_3)
