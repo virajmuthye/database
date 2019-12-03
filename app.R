@@ -14,7 +14,7 @@ MyTable <- fread("pfam_mitominer_tissue.csv")
 MyOrtho <- fread("orthology_mitominer_domcomb_tissue.csv")
 MyPre <- fread("presequence_mitominer_domcomb_tissue.csv")
 MyGO <- fread("go_mitominer.csv")
-MyGene <- fread("gene.csv")
+MyGene <- fread("gene.csv", fill=TRUE)
 MyOntology <- fread("ontology.csv")
 
 #extract colum informations
@@ -78,9 +78,11 @@ ui <- fluidPage(
            and two outgroups - Acanthamoeba castellanii (acas) and Saccharomyces cerevisiae (scer). Each species is denoted by a four letter abbreviation 
           listed in the parentheses."
         ),
+        br(),
         p(
           "MMPdb is organized into four tabsets: Orthology, MTS, Domain and Gene Ontology"
         ),
+        br(),
         strong("Orthology Tabset"),
         p(
           "The Orthology tabset can be used to analyze and download proteins belonging to a specific Orthology Group (OG) of interest.
@@ -110,6 +112,11 @@ ui <- fluidPage(
           "Details regarding construction of the database are given in our manuscript titled 'MMPdb and MitoPredictor- tools for facilitating
           comparative analysis of animal mitochondrial proteomes (under review)'"
         ),
+        br(),
+        strong(
+          "It may take a few minutes for the database to load the database."
+        ),
+        br(),
         p(
           "For queries or suggestions, contact Viraj Muthye at vrmuthye@iastate.edu"
          )
@@ -134,7 +141,7 @@ ui <- fluidPage(
             "mitolabel",
             label = "Known subcellular localization (mitochondrial/non-mitochondrial):",
             c("Mitochondrial" = "Y", "Non-mitochondrial" = "N"),
-            selected = c("Y")
+            selected = c("Y","N")
           ),
           checkboxGroupInput(
             "tp_3",
@@ -187,30 +194,22 @@ ui <- fluidPage(
           br(),
           strong("Key for table"),
           br(),
-          strong("og"),
+          strong("OG"),
           p("Unique Orthologous Group (OG) identifier."),
-          strong("mito"),
+          strong("Mitochondrial"),
           p("Mitochondrial/Non-mitochondrial protein"),
-          strong("tp"),
-          p("TargetP prediction"),
-          strong("rc"),
-          p("Reliability Class for TargetP prediction"),
-          strong("mf_pred"),
-          p("MitoFates prediction"),
-          strong("mf_prob"),
-          p("MitoFates prediction probability"),
-          strong("mppsite"),
+          strong("MPP cleavage site"),
           p("Mitochondrial Processing Peptidase cleavage site"),
           strong("GO"),
           p("Mitochondrial localization evidence from MitoMiner (Gene Ontology)"),
-          strong("HumanProteinAtlas"),
+          strong("Human Protein Atlas"),
           p("Mitochondrial localization evidence from MitoMiner (Human Protein Atlas)"),
           strong("GFP"),
           p("Mitochondrial localization evidence from MitoMiner (GFP analysis)"),
-          strong("MassSpecStudies"),
+          strong("Mass Spectrometry"),
           p("Mitochondrial localization evidence from MitoMiner (Mass spectrometry studies)"),
-          strong("domainComb"),
-          p("Protein domain combination"),
+          strong("Domain combination"),
+          p("List of all protein domains"),
           br()
         ),
         
@@ -343,29 +342,22 @@ ui <- fluidPage(
           br(),
           strong("Key for table"),
           br(),
-          strong("og"),
-          p("Outgroup ID (gene name)"),
-          strong("mito"),
+          strong("OG number"),
+          p("Unique Orthologous Group (OG) identifier."),
+          strong("Mitochondrial"),
           p("Mitochondrial/Non-mitochondrial protein"),
-          strong("tp"),
-          p("TargetP prediction"),
-          strong("rc"),
-          p("Reliability Class for TargetP prediction"),
-          strong("mf"),
-          p("MitoFates prediction"),
-          strong("mf_prob"),
-          p("MitoFates prediction probability"),
-          strong("mppsite"),
+          strong("MPP cleavage site"),
           p("Mitochondrial Processing Peptidase cleavage site"),
+          strong("GO"),
           p("Mitochondrial localization evidence from MitoMiner (Gene Ontology)"),
-          strong("HumanProteinAtlas"),
+          strong("Human Protein Atlas"),
           p("Mitochondrial localization evidence from MitoMiner (Human Protein Atlas)"),
           strong("GFP"),
           p("Mitochondrial localization evidence from MitoMiner (GFP analysis)"),
-          strong("MassSpecStudies"),
+          strong("Mass Spectromtery"),
           p("Mitochondrial localization evidence from MitoMiner (Mass spectrometry studies)"),
-          strong("domainComb"),
-          p("Protein domain combination"),
+          strong("Domain combination"),
+          p("List of all protein domains"),
           br()
         ),
         mainPanel(
@@ -453,35 +445,23 @@ ui <- fluidPage(
           br(),
           strong("Key for table"),
           br(),
-          strong("og"),
-          p("Outgroup ID (gene name)"),
-          strong("mito"),
+          strong("OG number"),
+          p("Unique Orthologous Group (OG) identifier."),
+          strong("Mitochondrial"),
           p("Mitochondrial/Non-mitochondrial protein"),
-          strong("domid"),
-          p("PFAM domain Id"),
-          strong("domname"),
-          p("PFAM domain name"),
-          strong("comb"),
-          p("Protein domain combination"),
-          strong("tp"),
-          p("TargetP prediction"),
-          strong("rc"),
-          p("Reliability Class for TargetP prediction"),
-          strong("mf_pred"),
-          p("MitoFates prediction"),
-          strong("mf_prob"),
-          p("MitoFates prediction probability"),
-          strong("mppsite"),
+          strong("Domain combination"),
+          p("List of all protein domains"),
+          strong("MPP cleavage site"),
           p("Mitochondrial Processing Peptidase cleavage site"),
+          strong("GO"),
           p("Mitochondrial localization evidence from MitoMiner (Gene Ontology)"),
-          strong("HumanProteinAtlas"),
+          strong("Human Protein Atlas"),
           p("Mitochondrial localization evidence from MitoMiner (Human Protein Atlas)"),
           strong("GFP"),
           p("Mitochondrial localization evidence from MitoMiner (GFP analysis)"),
-          strong("MassSpecStudies"),
+          strong("Mass Spectrometry"),
           p("Mitochondrial localization evidence from MitoMiner (Mass spectrometry studies)"),
           br()
-          
         ),
         mainPanel(
           br(),
@@ -576,28 +556,21 @@ ui <- fluidPage(
           br(),
           strong("Key for table"),
           br(),
-          strong("og"),
-          p("Outgroup ID (gene name)"),
-          strong("mito"),
+          strong("OG number"),
+          p("Unique Orthologous Group (OG) identifier."),
+          strong("Mitochondrial"),
           p("Mitochondrial/Non-mitochondrial protein"),
-          strong("goid"),
+          strong("GO ID"),
           p("Gene Ontology term ID"),
-          strong("tp"),
-          p("TargetP prediction"),
-          strong("rc"),
-          p("Reliability Class for TargetP prediction"),
-          strong("mf"),
-          p("MitoFates prediction"),
-          strong("mf_prob"),
-          p("MitoFates prediction probability"),
-          strong("mppsite"),
+          strong("MPP cleavage site"),
           p("Mitochondrial Processing Peptidase cleavage site"),
+          strong("GO"),
           p("Mitochondrial localization evidence from MitoMiner (Gene Ontology)"),
-          strong("HumanProteinAtlas"),
+          strong("Human Protein Atlas"),
           p("Mitochondrial localization evidence from MitoMiner (Human Protein Atlas)"),
           strong("GFP"),
           p("Mitochondrial localization evidence from MitoMiner (GFP analysis)"),
-          strong("MassSpecStudies"),
+          strong("Mass Spectromtery"),
           p("Mitochondrial localization evidence from MitoMiner (Mass spectrometry studies)"),
           br()
         ),
@@ -638,7 +611,7 @@ server <- function(input, output) {
   output$view6 <- DT::renderDataTable({
     DT::datatable(
       data = MyGene,
-      options = list(pageLength = 10),
+      options = list(pageLength = 1),
       rownames = FALSE
     )
   })
@@ -646,7 +619,7 @@ server <- function(input, output) {
   output$view61 <- DT::renderDataTable({
     DT::datatable(
       data = MyOntology,
-      options = list(pageLength = 10),
+      options = list(pageLength = 1),
       rownames = FALSE
     )
   })
@@ -663,7 +636,7 @@ server <- function(input, output) {
     DT::datatable(
       data = dom_select[, -c(1,10,15)],
       options = list(pageLength = 50),
-      rownames = FALSE
+      colnames = c('Renamed proteinID','UniprotID','ProteinID','PFAM ID','Domain name','Domain combination','OG number','Mitochondrial','TargetP prediction','TargetP RC','MitoFates probability','MitoFates prediction','GO','Human Protein Atlas','GFP','Mass Spectromtery','Tissue')
     )
   })
   
@@ -752,7 +725,7 @@ server <- function(input, output) {
     DT::datatable(
       data = go_select[, -c(1,7,12)],
       options = list(pageLength = 50),
-      rownames = FALSE
+      colnames = c('Renamed proteinID','UniprotID','ProteinID','GO ID','Mitochondrial','TargetP prediction','TargetP RC','MitoFates probability','MitoFates prediction','GO','Human Protein Atlas','GFP','Mass Spectromtery')
     )
   })
   
@@ -819,7 +792,7 @@ server <- function(input, output) {
     DT::datatable(
       data = pre_select[, -c(1,5,7,12,13,14)],
       options = list(pageLength = 50),
-      rownames = FALSE
+      colnames= c('Renamed proteinID','UniprotID','ProteinID','Mitochondrial','TargetP prediction','TargetP RC','MitoFates probability','MitoFates prediction','GO','Human Protein Atlas','GFP','Mass Spectromtery','Domain combination','Tissue')
     )
     
   })
@@ -894,8 +867,9 @@ server <- function(input, output) {
     DT::datatable(
       data = ortho_select[, -c(1,7)],
       options = list(pageLength = 50),
-      rownames = FALSE
-    )
+      #rownames = FALSE,
+      colnames = c('OG','Renamed ProteinID','ProteinID','Protein name','Mitochondrial','TargetP prediction','TargetP RC','MitoFates probablity','MitoFates prediction','MPP cleavage site','GO','Human Protein Atlas','GFP','Mass Spectrometry','Domain combination','Tissue')
+      )
   })
   
   df_subset <- reactive({
