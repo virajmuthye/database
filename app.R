@@ -10,11 +10,12 @@ library(shinythemes)
 library(data.table)
 
 #read in the datasets
-MyTable <- fread("data/pfam_mitominer_tissue.csv")
-MyOrtho <- fread("data/orthology_mitominer_domcomb_tissue.csv")
-MyPre <- fread("data/presequence_mitominer_domcomb_tissue.csv")
-MyGO <- fread("data/go_mitominer.csv")
-MyGene <- fread("data/gene.csv")
+MyTable <- fread("pfam_mitominer_tissue.csv")
+MyOrtho <- fread("orthology_mitominer_domcomb_tissue.csv")
+MyPre <- fread("presequence_mitominer_domcomb_tissue.csv")
+MyGO <- fread("go_mitominer.csv")
+MyGene <- fread("gene.csv")
+MyOntology <- fread("ontology.csv")
 
 #extract colum informations
 col1 <-  MyTable$species
@@ -602,6 +603,16 @@ ui <- fluidPage(
         ),
         mainPanel(
           br(),
+          strong(
+            "Search for the GO ID"
+            ),
+          p(
+            "The primary search query for this tabset is the GO ID number. To search for the GO ID, start typing the 
+            Go term (mitochondrion) or keywords of interest (mitochondrial inner membrane) in the search bar below"
+          ),
+          br(),
+          DT::dataTableOutput(outputId = "view61"),
+          br(),
           selectInput(
             inputId = "goid",
             label = "Enter Gene Ontology (GO) ID",
@@ -627,7 +638,15 @@ server <- function(input, output) {
   output$view6 <- DT::renderDataTable({
     DT::datatable(
       data = MyGene,
-      options = list(pageLength = 1),
+      options = list(pageLength = 10),
+      rownames = FALSE
+    )
+  })
+  
+  output$view61 <- DT::renderDataTable({
+    DT::datatable(
+      data = MyOntology,
+      options = list(pageLength = 10),
       rownames = FALSE
     )
   })
